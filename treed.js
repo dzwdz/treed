@@ -37,32 +37,26 @@ function handlePost(post) {
 
 	if (date != currentDay.date) { // advance day
 		daysLeft--;
-		const [outer, header, inner] = expandable();
-		document.getElementById('main').appendChild(outer);
-		header.innerText = date;
-		currentDay = {
-			date: date,
-			inner: inner,
-			people: {}
-		};
+		currentDay = expandable();
+		currentDay.header.innerText = date;
+		currentDay.date = date;
+		currentDay.people = {};
+
+		document.getElementById('main').appendChild(currentDay);
 	}
 
 	if (!currentDay.people[acct]) {
-		const [outer, header, inner] = expandable();
+		const el = expandable();
 
-		header.innerText = acct;
-		const count = header.appendChild(createElementObj('snap'));
-		header.appendChild(
+		el.header.innerText = acct;
+		el.header.countEl = el.header.appendChild(createElementObj('snap'));
+		el.header.appendChild(
 			createElementObj('img', {
 				classList: 'avatar',
 				src: post.account.avatar_static,}));
 
-		currentDay.inner.appendChild(outer);
-		currentDay.people[acct] = {
-			header: header,
-			inner: inner,
-			count: count,
-		};
+		currentDay.inner.appendChild(el);
+		currentDay.people[acct] = el;
 	}
 
 	const toot = createElementObj('div', {classList: 'toot'});
@@ -88,8 +82,8 @@ function handlePost(post) {
 	currentDay.people[acct].inner.prepend(toot);
 
 	// update toot amt
-	const cnt = currentDay.people[acct].inner.children.length;
-	currentDay.people[acct].count.innerText = ` (${cnt})`;
+	const p = currentDay.people[acct];
+	p.header.countEl.innerText = ` (${p.inner.children.length})`;
 }
 
 function loadingStatus(str) {
@@ -105,16 +99,16 @@ function getPage() {
 		.then(posts => {
 			posts.forEach(handlePost);
 			loadingStatus(`have ${alreadyLoaded}, done for now`);
-			if (posts.length && daysLeft > 0) getPage();
+			if (posts.length && daysLeft >= 0) getPage();
 		});
 }
 
 function expandable() {
-	let outer = createElementObj('div', {classList: 'expand'});
-	let header = outer.appendChild(createElementObj('div', {classList: 'expand-header'}));
-	let inner = outer.appendChild(createElementObj('div', {classList: 'expand-inner', hidden: true}));
-	header.onclick = () => inner.toggleAttribute('hidden');
-	return [outer, header, inner];
+	let e = createElementObj('div', {classList: 'expand'});
+	e.header = e.appendChild(createElementObj('div', {classList: 'expand-header'}));
+	e.inner  = e.appendChild(createElementObj('div', {classList: 'expand-inner', hidden: true}));
+	e.header.onclick = () => e.inner.toggleAttribute('hidden');
+	return e;
 }
 
 getPage();
