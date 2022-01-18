@@ -93,7 +93,7 @@ function loadingStatus(str) {
 function getPage() {
 	let opts = {limit: 100};
 	if (max_id) opts.max_id = max_id;
-	loadingStatus(`have ${alreadyLoaded}, loading more... (${daysLeft} days left)}`);
+	loadingStatus(`have ${alreadyLoaded}, loading more... (${daysLeft} days left)`);
 
 	masto.get("/api/v1/timelines/home", opts)
 		.then(posts => {
