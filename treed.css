@@ -1,0 +1,51 @@
+.expand-header {
+    cursor: pointer;
+    padding-left: 1em;
+    vertical-align: middle;
+    line-height: 3em;
+}
+
+.expand-inner {
+    padding-left: .5em;
+    padding-bottom: 1em;
+}
+
+.expand {
+    margin-top: .5em;
+}
+
+body {
+    max-width: 80ch;
+}
+
+.expand .expand, body {background: #eee}
+
+.toot {
+    padding: 0 1em;
+    overflow: auto;
+}
+
+.toot, .expand {
+    background: #fff;
+    border-left: 2px solid;
+    border-radius: 4px;
+    margin: .5em;
+}
+
+.toot > * {
+    margin: 1em 0;
+}
+
+.reblog:before {content: "🔁 ";}
+.reply:before  {content: "↩️ ";}
+.poll:before   {content: "🗳️ ";}
+
+img.avatar {
+    width: 3em;
+    margin: 0;
+    float: right;
+}
+
+#main > .expand:last-child > .expand-header::after {
+	content: " (incomplete)";
+}
