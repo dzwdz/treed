@@ -5,20 +5,9 @@
     line-height: 3em;
 }
 
-.expand-inner {
-    padding-left: .5em;
-    padding-bottom: 1em;
-}
-
-.expand {
-    margin-top: .5em;
-}
-
 body {
     max-width: 80ch;
 }
-
-.expand .expand, body {background: #eee}
 
 .toot {
     padding: 0 1em;
@@ -26,7 +15,6 @@ body {
 }
 
 .toot, .expand {
-    background: #fff;
     border-left: 2px solid;
     border-radius: 4px;
     margin: .5em;
