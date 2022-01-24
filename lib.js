@@ -17,6 +17,16 @@ class Mastodon {
 		}
 		return res.json();
 	}
+
+	async post(endpoint, body) {
+		const fd = new FormData();
+		for (let key in body) fd.append(key, body[key]);
+		const res = await fetch(this.instance + endpoint, {
+			method: 'POST',
+			body: fd,
+		});
+		return res.json();
+	}
 }
 
 function createElementObj(type, obj) {
