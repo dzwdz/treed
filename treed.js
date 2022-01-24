@@ -79,14 +79,18 @@ function handlePost(post) {
 	}
 
 	if (!currentDay.people[acct]) {
-		const el = expandable();
-
-		el.header.innerText = acct;
+		const el = createElementObj('div', {classList: 'expand'});
+		el.header = el.appendChild(createElementObj('div', {
+			classList: 'expand-header',
+			onclick: () => el.inner.toggleAttribute('hidden'),
+			innerText: acct,
+		}));
 		el.header.countEl = el.header.appendChild(createElementObj('snap'));
 		el.header.appendChild(
 			createElementObj('img', {
 				classList: 'avatar',
 				src: post.account.avatar_static,}));
+		el.inner  = el.appendChild(createElementObj('div', {classList: 'expand-inner', hidden: true}));
 
 		currentDay.appendChild(el);
 		currentDay.people[acct] = el;
@@ -138,14 +142,6 @@ async function getPage(running_total = 0, max_id = null) {
 		await getPage(running_total, max_id);
 	else
 		loadingStatus(`have ${running_total}, done for now`);
-}
-
-function expandable() {
-	let e = createElementObj('div', {classList: 'expand'});
-	e.header = e.appendChild(createElementObj('div', {classList: 'expand-header'}));
-	e.inner  = e.appendChild(createElementObj('div', {classList: 'expand-inner', hidden: true}));
-	e.header.onclick = () => e.inner.toggleAttribute('hidden');
-	return e;
 }
 
 getPage()
