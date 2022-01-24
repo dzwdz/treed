@@ -11,6 +11,10 @@ class Mastodon {
 				'Authorization': 'Bearer ' + this.token,
 			},
 		});
+		console.log(res);
+		if (res.status == 401) {
+			throw 401;
+		}
 		return res.json();
 	}
 }
@@ -19,21 +23,17 @@ function createElementObj(type, obj) {
 	return Object.assign(document.createElement(type), obj);
 }
 
-if (!localStorage.access_token) alert("set localStorage.access_token");
+if (!localStorage.access_token) window.location = 'options.html';
 let masto = new Mastodon("https://tilde.zone", localStorage.access_token);
 
 let currentDay = {};
-let max_id = null;
 let daysLeft = 4; // TODO does a day limit even make sense? there seems to be a hard cap of posts at 400
-let alreadyLoaded = 0;
 
 // posts MUST be passed from newest to oldest // TODO assert
 function handlePost(post) {
 	console.log(post);
 	const date = post.created_at.split('T')[0];
 	const acct = post.account.acct;
-	alreadyLoaded++;
-	max_id = post.id;
 
 	if (date != currentDay.date) { // advance day
 		daysLeft--;
@@ -90,17 +90,21 @@ function loadingStatus(str) {
 	document.getElementById('status').innerText = str;
 }
 
-function getPage() {
+async function getPage(running_total = 0, max_id = null) {
 	let opts = {limit: 100};
 	if (max_id) opts.max_id = max_id;
-	loadingStatus(`have ${alreadyLoaded}, loading more... (${daysLeft} days left)`);
+	loadingStatus(`have ${running_total}, loading more... (${daysLeft} days left)`);
 
-	masto.get("/api/v1/timelines/home", opts)
-		.then(posts => {
-			posts.forEach(handlePost);
-			loadingStatus(`have ${alreadyLoaded}, done for now`);
-			if (posts.length && daysLeft >= 0) getPage();
-		});
+	let posts = await masto.get("/api/v1/timelines/home", opts)
+	posts.forEach(handlePost);
+
+	max_id = posts[posts.length - 1].id;
+	running_total += posts.length;
+
+	if (posts.length && daysLeft >= 0)
+		await getPage(running_total, max_id);
+	else
+		loadingStatus(`have ${running_total}, done for now`);
 }
 
 function expandable() {
@@ -111,4 +115,9 @@ function expandable() {
 	return e;
 }
 
-getPage();
+getPage()
+	.catch((e) => {
+		if (e == 401) { // shit tier error handling
+			alert("Invalid access token. Check your settings.")
+		}
+	});
