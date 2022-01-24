@@ -28,6 +28,7 @@ let masto = new Mastodon("https://tilde.zone", localStorage.access_token);
 
 let currentDay = {};
 let daysLeft = 4; // TODO does a day limit even make sense? there seems to be a hard cap of posts at 400
+let dayIdx = -1;
 
 // posts MUST be passed from newest to oldest // TODO assert
 function handlePost(post) {
@@ -37,10 +38,42 @@ function handlePost(post) {
 
 	if (date != currentDay.date) { // advance day
 		daysLeft--;
-		currentDay = expandable();
-		currentDay.header.innerText = date;
+		dayIdx++;
+		currentDay = createElementObj('div', {classList: 'day'});
 		currentDay.date = date;
 		currentDay.people = {};
+		currentDay.hidden = dayIdx != 1;
+		let capture = currentDay;
+
+		let header = createElementObj('div', {
+			innerText: ' ' + date + ' ',
+			classList: 'day-header',
+		});
+		header.prepend(createElementObj('a', {
+			innerText: 'prev',
+			classList: 'prev-day',
+			href: '#',
+			onclick: () => {
+				let next = capture.previousSibling;
+				if (next) {
+					capture.hidden = true;
+					next.hidden = false;
+				}
+			}
+		}));
+		header.append(createElementObj('a', {
+			innerText: 'next',
+			classList: 'next-day',
+			href: '#',
+			onclick: () => {
+				let next = capture.nextSibling;
+				if (next) {
+					capture.hidden = true;
+					next.hidden = false;
+				}
+			}
+		}));
+		currentDay.appendChild(header);
 
 		document.getElementById('main').appendChild(currentDay);
 	}
@@ -55,7 +88,7 @@ function handlePost(post) {
 				classList: 'avatar',
 				src: post.account.avatar_static,}));
 
-		currentDay.inner.appendChild(el);
+		currentDay.appendChild(el);
 		currentDay.people[acct] = el;
 	}
 

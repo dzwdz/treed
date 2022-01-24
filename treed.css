@@ -49,3 +49,12 @@ img.avatar {
 #main > .expand:last-child > .expand-header::after {
 	content: " (incomplete)";
 }
+
+.day-header {
+	text-align:center;
+	margin: 1em;
+}
+
+.day:first-child .prev-day, .day:last-child .next-day  {
+    visibility: hidden;
+}
