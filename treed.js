@@ -1,5 +1,5 @@
 if (!localStorage.access_token) window.location = 'options.html';
-let masto = new Mastodon("https://tilde.zone", localStorage.access_token);
+let masto = new Mastodon(localStorage.instance, localStorage.access_token);
 
 let currentDay = {};
 let daysLeft = 4; // TODO does a day limit even make sense? there seems to be a hard cap of posts at 400
