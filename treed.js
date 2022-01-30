@@ -67,8 +67,22 @@ function handlePost(post) {
 				src: post.account.avatar_static,}));
 		el.inner  = el.appendChild(createElementObj('div', {classList: 'expand-inner', hidden: true}));
 
-		currentDay.appendChild(el);
 		currentDay.people[acct] = el;
+
+		/* inserts el into the proper place to keep a consistent order between days
+		 * i hope noone will be reading this, shit's ugly */
+		function nickCompare(a, b) {
+			let isLocal = (nick) => nick.indexOf('@') == -1;
+			if (isLocal(a) && !isLocal(b)) return -1;
+			if (!isLocal(a) && isLocal(b)) return 1;
+			if (a < b) return -1;
+			if (a > b) return 1;
+			return 0;
+		}
+		let nicks = Object.keys(currentDay.people).sort(nickCompare);
+		let myIdx = nicks.indexOf(acct);
+		let firstBigger = currentDay.people[nicks[myIdx + 1]];
+		currentDay.insertBefore(el, firstBigger);
 	}
 
 	const toot = createElementObj('div', {classList: 'toot'});
