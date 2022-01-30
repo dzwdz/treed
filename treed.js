@@ -1,4 +1,5 @@
-if (!localStorage.access_token) window.location = 'options.html';
+if (!localStorage.instance || !localStorage.access_token)
+	window.location = 'login.html';
 let masto = new Mastodon(localStorage.instance, localStorage.access_token);
 
 let currentDay = {};

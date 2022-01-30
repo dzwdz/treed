@@ -1,5 +1,7 @@
 class Mastodon {
 	constructor(instance, token) {
+		if (instance.indexOf('://') == -1)
+			instance = 'https://' + instance;
 		this.instance = instance;
 		this.token = token;
 	}
@@ -26,6 +28,25 @@ class Mastodon {
 			body: fd,
 		});
 		return res.json();
+	}
+
+	async oauth_login() {
+		let redir = window.location.href;
+		redir = redir.substr(0, redir.lastIndexOf('/')) + '/oauth.html';
+
+		let res = await this.post('/api/v1/apps', {
+			client_name: 'Treed',
+			redirect_uris: redir,
+			scopes: 'read',
+			website: 'https://github.com/dzwdz/treed',
+		});
+		localStorage.oauth = JSON.stringify(res);
+		window.location = this.instance + '/oauth/authorize?' + new URLSearchParams({
+			client_id: res.client_id,
+			scope: 'read',
+			redirect_uri: redir,
+			response_type: 'code'
+		});
 	}
 }
 

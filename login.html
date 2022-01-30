@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<title>logging into treed</title>
+		<link rel="stylesheet" href="treed.css">
+	</head>
+	<body>
+		<center>
+		<h1>log into mastodon</h1>
+		<hr/>
+		<label>your instance: <input id="instance" placeholder="mastodon.example"></label>
+		<button id="login-btn">login</button>
+		</center>
+
+		<script src="lib.js"></script>
+		<script>
+let input = document.getElementById('instance');
+if (localStorage.instance) input.value = localStorage.instance;
+
+document.getElementById('login-btn').onclick = async () => {
+	localStorage.instance = input.value;
+	let masto = new Mastodon(localStorage.instance, null);
+
+	try {
+		await masto.oauth_login();
+	} catch (e) {
+		console.log(e);
+		alert("hmm, that doesn't seem like a valid instance");
+	}
+};
+		</script>
+	</body>
+</html>

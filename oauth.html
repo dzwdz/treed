@@ -6,16 +6,18 @@ wait a moment
 	let masto = new Mastodon(localStorage.instance, null);
 
 	let code = (new URLSearchParams(window.location.search)).get('code');
-	let oauth = JSON.parse(localStorage.oauth);
-	let res = await masto.post('/oauth/token', {
-		client_id: oauth.client_id,
-		client_secret: oauth.client_secret,
-		redirect_uri: oauth.redirect_uri,
-		grant_type: 'authorization_code',
-		code: code,
-		scope: 'read',
-	});
-	localStorage.access_token = res.access_token;
-	window.location = 'options.html';
+	if (code) {
+		let oauth = JSON.parse(localStorage.oauth);
+		let res = await masto.post('/oauth/token', {
+			client_id: oauth.client_id,
+			client_secret: oauth.client_secret,
+			redirect_uri: oauth.redirect_uri,
+			grant_type: 'authorization_code',
+			code: code,
+			scope: 'read',
+		});
+		localStorage.access_token = res.access_token;
+	}
+	window.location = 'index.html';
 })();
 </script>

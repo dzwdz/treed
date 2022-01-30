@@ -48,3 +48,7 @@ img.avatar {
 .day:first-child .prev-day, .day:last-child .next-day  {
     visibility: hidden;
 }
+
+h1 {
+	font-size: 1.5em;
+}
