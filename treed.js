@@ -82,6 +82,12 @@ function handlePost(post) {
 				src: post.account.avatar_static,}));
 		toot.appendChild(reblog);
 	}
+	if (post.in_reply_to_id) {
+		toot.appendChild(createElementObj('div', {
+			classList: 'reply',
+			innerText: 'reply', /* TODO link to full thread view */
+		}));
+	}
 	toot.innerHTML += post.content;
 	post.media_attachments.forEach(m => {
 		toot.appendChild(
