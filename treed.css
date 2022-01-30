@@ -7,6 +7,7 @@
 
 body {
     max-width: 80ch;
+	margin-bottom: 30em; /* prevents the page from jumping around when collapsing people near the bottom */
 }
 
 .toot {
