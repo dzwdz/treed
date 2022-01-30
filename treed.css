@@ -12,6 +12,7 @@ body {
 .toot {
     padding: 0 1em;
     overflow: auto;
+	border-bottom: 1px solid;
 }
 
 .toot, .expand {
