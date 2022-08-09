@@ -36,10 +36,6 @@ img.avatar {
     float: right;
 }
 
-#main > .expand:last-child > .expand-header::after {
-	content: " (incomplete)";
-}
-
 .day-header {
 	text-align:center;
 	margin: 1em;

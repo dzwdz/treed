@@ -2,121 +2,139 @@ if (!localStorage.instance || !localStorage.access_token)
 	window.location = 'login.html';
 let masto = new Mastodon(localStorage.instance, localStorage.access_token);
 
-let currentDay = {};
+let currentDay = null;
 let daysLeft = 4; // TODO does a day limit even make sense? there seems to be a hard cap of posts at 400
-let dayIdx = -1;
 
-// posts MUST be passed from newest to oldest // TODO assert
+let tree = {};
+let mainEl = document.getElementById('main');
+
+
+function insertIfMissing(parent, key, sortFn, elFn) {
+	if (!parent.fwChildren) parent.fwChildren = {};
+	let collection = parent.fwChildren;
+	if (!collection[key]) {
+		let el = elFn()
+		collection[key] = el;
+		let others = sortFn(Object.keys(collection));
+		let firstBigger = collection[others[others.indexOf(key) + 1]];
+		parent.insertBefore(el, firstBigger);
+	}
+	return collection[key];
+}
+
+function nickCompare(a, b) {
+	let isLocal = (nick) => nick.indexOf('@') == -1;
+	if (isLocal(a) && !isLocal(b)) return -1;
+	if (!isLocal(a) && isLocal(b)) return 1;
+	if (a < b) return -1;
+	if (a > b) return 1;
+	return 0;
+}
+
+// TODO somehow indicate that a tree has finished loading / show newly loaded posts
+function renderTree() {
+	for (const date in tree) {
+		let dayEl = insertIfMissing(mainEl, date, a => a.sort().reverse(), () => {
+			let currentDay = createElementObj('div', {
+				classList: 'day',
+			});
+			// TODO if there's only one day available this won't display anything
+			currentDay.hidden = date != Object.keys(tree).sort().reverse()[1];
+
+			let header = createElementObj('div', {
+				innerText: ' ' + date + ' ',
+				classList: 'day-header',
+			});
+			header.prepend(createElementObj('a', {
+				innerText: 'prev',
+				classList: 'prev-day',
+				href: '#',
+				onclick: () => {
+					let next = currentDay.previousSibling;
+					if (next) {
+						currentDay.hidden = true;
+						next.hidden = false;
+					}
+				},
+			}));
+			header.append(createElementObj('a', {
+				innerText: 'next',
+				classList: 'next-day',
+				href: '#',
+				onclick: () => {
+					let next = currentDay.nextSibling;
+					if (next) {
+						currentDay.hidden = true;
+						next.hidden = false;
+					}
+				},
+			}));
+			currentDay.appendChild(header);
+			return currentDay;
+		});
+
+		for (const acct in tree[date]) {
+			let acctEl = insertIfMissing(dayEl, acct, a => a.sort(nickCompare), () => {
+				const el = createElementObj('div', {classList: 'expand'});
+				el.header = el.appendChild(createElementObj('div', {
+					classList: 'expand-header',
+					onclick: () => el.inner.toggleAttribute('hidden'),
+					innerText: acct,
+				}));
+				el.header.countEl = el.header.appendChild(createElementObj('snap'));
+
+				el.header.appendChild(createElementObj('img', {
+					classList: 'avatar',
+					src: Object.values(tree[date][acct])[0].account.avatar_static,
+				}));
+				el.inner = el.appendChild(createElementObj('div', {classList: 'expand-inner', hidden: true}));
+				return el;
+			});
+
+			for (const tootId in tree[date][acct]) {
+				insertIfMissing(acctEl.inner, tootId, a => a.sort().reverse(), () => {
+					let post = tree[date][acct][tootId];
+					const toot = createElementObj('div', {classList: 'toot'});
+					if (post.reblog) {
+						post = post.reblog;
+						const reblog = createElementObj('div', {classList: 'reblog'});
+						reblog.innerText = post.account.acct;
+						// TODO stop images from preloading to save bandwidth and prevent 429
+						reblog.appendChild(
+							createElementObj('img', {
+								classList: 'avatar',
+								src: post.account.avatar_static,}));
+						toot.appendChild(reblog);
+					}
+					if (post.in_reply_to_id) {
+						toot.appendChild(createElementObj('div', {
+							classList: 'reply',
+							innerText: 'reply', /* TODO link to full thread view */
+						}));
+					}
+					toot.innerHTML += post.content;
+					post.media_attachments.forEach(m => {
+						toot.appendChild(
+							createElementObj('img', {
+								src: m.preview_url,
+								alt: m.description,
+								title: m.description}));
+					});
+					return toot;
+				});
+				acctEl.header.countEl.innerText = ` (${acctEl.inner.children.length})`;
+			}
+		}
+	}
+}
+
 function handlePost(post) {
-	console.log(post);
 	const date = post.created_at.split('T')[0];
 	const acct = post.account.acct;
-
-	if (date != currentDay.date) { // advance day
-		daysLeft--;
-		dayIdx++;
-		currentDay = createElementObj('div', {classList: 'day'});
-		currentDay.date = date;
-		currentDay.people = {};
-		currentDay.hidden = dayIdx != 1;
-		let capture = currentDay;
-
-		let header = createElementObj('div', {
-			innerText: ' ' + date + ' ',
-			classList: 'day-header',
-		});
-		header.prepend(createElementObj('a', {
-			innerText: 'prev',
-			classList: 'prev-day',
-			href: '#',
-			onclick: () => {
-				let next = capture.previousSibling;
-				if (next) {
-					capture.hidden = true;
-					next.hidden = false;
-				}
-			}
-		}));
-		header.append(createElementObj('a', {
-			innerText: 'next',
-			classList: 'next-day',
-			href: '#',
-			onclick: () => {
-				let next = capture.nextSibling;
-				if (next) {
-					capture.hidden = true;
-					next.hidden = false;
-				}
-			}
-		}));
-		currentDay.appendChild(header);
-
-		document.getElementById('main').appendChild(currentDay);
-	}
-
-	if (!currentDay.people[acct]) {
-		const el = createElementObj('div', {classList: 'expand'});
-		el.header = el.appendChild(createElementObj('div', {
-			classList: 'expand-header',
-			onclick: () => el.inner.toggleAttribute('hidden'),
-			innerText: acct,
-		}));
-		el.header.countEl = el.header.appendChild(createElementObj('snap'));
-		el.header.appendChild(
-			createElementObj('img', {
-				classList: 'avatar',
-				src: post.account.avatar_static,}));
-		el.inner  = el.appendChild(createElementObj('div', {classList: 'expand-inner', hidden: true}));
-
-		currentDay.people[acct] = el;
-
-		/* inserts el into the proper place to keep a consistent order between days
-		 * i hope noone will be reading this, shit's ugly */
-		function nickCompare(a, b) {
-			let isLocal = (nick) => nick.indexOf('@') == -1;
-			if (isLocal(a) && !isLocal(b)) return -1;
-			if (!isLocal(a) && isLocal(b)) return 1;
-			if (a < b) return -1;
-			if (a > b) return 1;
-			return 0;
-		}
-		let nicks = Object.keys(currentDay.people).sort(nickCompare);
-		let myIdx = nicks.indexOf(acct);
-		let firstBigger = currentDay.people[nicks[myIdx + 1]];
-		currentDay.insertBefore(el, firstBigger);
-	}
-
-	const toot = createElementObj('div', {classList: 'toot'});
-	if (post.reblog) {
-		post = post.reblog;
-		const reblog = createElementObj('div', {classList: 'reblog'});
-		reblog.innerText = post.account.acct;
-		reblog.appendChild(
-			createElementObj('img', {
-				classList: 'avatar',
-				src: post.account.avatar_static,}));
-		toot.appendChild(reblog);
-	}
-	if (post.in_reply_to_id) {
-		toot.appendChild(createElementObj('div', {
-			classList: 'reply',
-			innerText: 'reply', /* TODO link to full thread view */
-		}));
-	}
-	toot.innerHTML += post.content;
-	post.media_attachments.forEach(m => {
-		toot.appendChild(
-			createElementObj('img', {
-				src: m.preview_url,
-				alt: m.description,
-				title: m.description}));
-	});
-
-	currentDay.people[acct].inner.prepend(toot);
-
-	// update toot amt
-	const p = currentDay.people[acct];
-	p.header.countEl.innerText = ` (${p.inner.children.length})`;
+	if (!tree[date]) tree[date] = {};
+	if (!tree[date][acct]) tree[date][acct] = {};
+	tree[date][acct][post.id] = post;
+	renderTree();
 }
 
 function loadingStatus(str) {
@@ -145,4 +163,5 @@ getPage()
 		if (e == 401) { // shit tier error handling
 			alert("Invalid access token. Check your settings.")
 		}
+		console.log(e);
 	});
