@@ -149,8 +149,10 @@ async function getPage(running_total = 0, max_id = null) {
 	let posts = await masto.get("/api/v1/timelines/home", opts)
 	posts.forEach(handlePost);
 
-	max_id = posts[posts.length - 1].id;
-	running_total += posts.length;
+	if (posts.length) {
+		max_id = posts[posts.length - 1].id;
+		running_total += posts.length;
+	}
 
 	if (posts.length && daysLeft >= 0)
 		await getPage(running_total, max_id);
