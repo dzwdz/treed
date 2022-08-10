@@ -74,26 +74,22 @@ function renderTree() {
 
 		for (const acct in tree[date]) {
 			let acctEl = insertIfMissing(dayEl, acct, a => a.sort(nickCompare), () => {
-				const el = createElementObj('div', {classList: 'expand'});
-				el.header = el.appendChild(createElementObj('div', {
-					classList: 'expand-header',
-					onclick: () => el.inner.toggleAttribute('hidden'),
+				const el = createElementObj('details', {classList: 'acct'});
+				el.header = el.appendChild(createElementObj('summary', {
 					innerText: acct,
 				}));
 				el.header.countEl = el.header.appendChild(createElementObj('snap'));
-
 				el.header.appendChild(createElementObj('img', {
 					classList: 'avatar',
 					src: Object.values(tree[date][acct])[0].account.avatar_static,
 				}));
-				el.inner = el.appendChild(createElementObj('div', {classList: 'expand-inner', hidden: true}));
 				return el;
 			});
 			let toots = Object.values(tree[date][acct]);
 			acctEl.header.countEl.innerText = ` (${toots.filter(t=>!t.reblog).length} | ${toots.filter(t=>t.reblog).length})`;
 
 			for (const tootId in tree[date][acct]) {
-				insertIfMissing(acctEl.inner, tootId, a => a.sort().reverse(), () => {
+				insertIfMissing(acctEl, tootId, a => a.sort().reverse(), () => {
 					let post = tree[date][acct][tootId];
 					const toot = createElementObj('div', {classList: 'toot'});
 					if (post.reblog) {

@@ -1,14 +1,46 @@
-.expand-header {
-    cursor: pointer;
-    padding-left: 1em;
-    vertical-align: middle;
-    line-height: 3em;
-}
-
 body {
     max-width: 80ch;
 	margin-bottom: 30em; /* prevents the page from jumping around when collapsing people near the bottom */
 }
+
+h1 {
+	font-size: 1.5em;
+}
+
+h2 {
+	font-size: 1em;
+}
+
+
+.day-header {
+	text-align:center;
+	margin: 1em;
+}
+
+.day:first-child .prev-day, .day:last-child .next-day  {
+    visibility: hidden;
+}
+
+.acct {
+	margin-bottom: .5em;
+}
+
+.acct > summary {
+	vertical-align: middle;
+	line-height: 3em;
+	clear: left;
+	cursor: pointer;
+}
+
+img.avatar {
+	width: 3em;
+	height: 3em;
+	margin: 0;
+	margin-right: 1ch;
+	float: left;
+}
+
+.toot img.avatar { float: right; }
 
 .toot {
     padding: 0 1em;
@@ -29,26 +61,3 @@ body {
 .reblog:before {content: "🔁 ";}
 .reply:before  {content: "↩️ ";}
 .poll:before   {content: "🗳️ ";}
-
-img.avatar {
-    width: 3em;
-    margin: 0;
-    float: right;
-}
-
-.day-header {
-	text-align:center;
-	margin: 1em;
-}
-
-.day:first-child .prev-day, .day:last-child .next-day  {
-    visibility: hidden;
-}
-
-h1 {
-	font-size: 1.5em;
-}
-
-h2 {
-	font-size: 1em;
-}
