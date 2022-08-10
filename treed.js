@@ -45,11 +45,11 @@ function renderTree() {
 				classList: 'day-header',
 			});
 			header.prepend(createElementObj('a', {
-				innerText: 'prev',
-				classList: 'prev-day',
+				innerText: 'before',
+				classList: 'next-day',
 				href: '#',
 				onclick: () => {
-					let next = currentDay.previousSibling;
+					let next = currentDay.nextSibling;
 					if (next) {
 						currentDay.hidden = true;
 						next.hidden = false;
@@ -57,11 +57,11 @@ function renderTree() {
 				},
 			}));
 			header.append(createElementObj('a', {
-				innerText: 'next',
-				classList: 'next-day',
+				innerText: 'after',
+				classList: 'prev-day',
 				href: '#',
 				onclick: () => {
-					let next = currentDay.nextSibling;
+					let next = currentDay.previousSibling;
 					if (next) {
 						currentDay.hidden = true;
 						next.hidden = false;
