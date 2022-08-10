@@ -3,7 +3,6 @@ if (!localStorage.instance || !localStorage.access_token)
 let masto = new Mastodon(localStorage.instance, localStorage.access_token);
 
 let currentDay = null;
-let daysLeft = 4; // TODO does a day limit even make sense? there seems to be a hard cap of posts at 400
 
 let tree = {};
 let mainEl = document.getElementById('main');
@@ -141,29 +140,48 @@ function loadingStatus(str) {
 	document.getElementById('status').innerText = str;
 }
 
-async function getPage(running_total = 0, max_id = null) {
-	let opts = {limit: 100};
-	if (max_id) opts.max_id = max_id;
-	loadingStatus(`have ${running_total}, loading more... (${daysLeft} days left)`);
-
-	let posts = await masto.get("/api/v1/timelines/home", opts)
-	posts.forEach(handlePost);
-
-	if (posts.length) {
-		max_id = posts[posts.length - 1].id;
-		running_total += posts.length;
-	}
-
-	if (posts.length && daysLeft >= 0)
-		await getPage(running_total, max_id);
-	else
-		loadingStatus(`have ${running_total}, done for now`);
+function treeIds() {
+	return Object.values(tree).flatMap(Object.values).flatMap(Object.keys).sort();
 }
 
-getPage()
-	.catch((e) => {
-		if (e == 401) { // shit tier error handling
-			alert("Invalid access token. Check your settings.")
-		}
-		console.log(e);
-	});
+function updateTree() {
+	// TODO does a day limit even make sense? there seems to be a hard cap of posts at 400
+	let daysLeft = 4;
+
+	let idTarget = treeIds().reverse()[0]; // max id
+
+	async function getPage(max_id = null) {
+		let opts = {limit: 100};
+		if (max_id) opts.max_id = max_id;
+		loadingStatus(`have ${treeIds().length}, loading more... (${daysLeft} days left)`);
+
+		let posts = await masto.get("/api/v1/timelines/home", opts)
+		posts.forEach(handlePost);
+
+		if (posts.length)
+			max_id = posts[posts.length - 1].id;
+
+		if ((!idTarget || max_id > idTarget) && posts.length && daysLeft >= 0)
+			await getPage(max_id);
+		else
+			loadingStatus(`have ${treeIds().length}, done for now`);
+	}
+
+	getPage()
+		.catch((e) => {
+			if (e == 401) { // shit tier error handling
+				alert("Invalid access token. Check your settings.")
+			}
+			console.log(e);
+		}).then(() => {
+			console.log("done? saving tree");
+			localStorage.tree = JSON.stringify(tree);
+		});
+}
+
+try {
+	tree = JSON.parse(localStorage.tree);
+} catch {}
+// TODO remove old entries
+// TODO compress
+updateTree();
