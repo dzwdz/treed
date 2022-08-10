@@ -179,9 +179,15 @@ function updateTree() {
 		});
 }
 
+function pruneTree() {
+	let maxDays = 5;
+	let toDelete = Object.keys(tree).sort().reverse().slice(maxDays);
+	toDelete.forEach(d => delete tree[d]);
+}
+
 try {
 	tree = JSON.parse(localStorage.tree);
+	pruneTree();
 } catch {}
-// TODO remove old entries
 // TODO compress
 updateTree();
