@@ -89,6 +89,8 @@ function renderTree() {
 				el.inner = el.appendChild(createElementObj('div', {classList: 'expand-inner', hidden: true}));
 				return el;
 			});
+			let toots = Object.values(tree[date][acct]);
+			acctEl.header.countEl.innerText = ` (${toots.filter(t=>!t.reblog).length} | ${toots.filter(t=>t.reblog).length})`;
 
 			for (const tootId in tree[date][acct]) {
 				insertIfMissing(acctEl.inner, tootId, a => a.sort().reverse(), () => {
@@ -121,7 +123,6 @@ function renderTree() {
 					});
 					return toot;
 				});
-				acctEl.header.countEl.innerText = ` (${acctEl.inner.children.length})`;
 			}
 		}
 	}
