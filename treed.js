@@ -91,8 +91,10 @@ function renderTree() {
 			for (const tootId in tree[date][acct]) {
 				insertIfMissing(acctEl, tootId, a => a.sort().reverse(), () => {
 					let post = tree[date][acct][tootId];
+					is_reblog = false;
 					const toot = createElementObj('div', {classList: 'toot'});
 					if (post.reblog) {
+						let is_reblog = true;
 						post = post.reblog;
 						const reblog = createElementObj('div', {classList: 'reblog'});
 						reblog.innerText = post.account.acct;
@@ -114,6 +116,16 @@ function renderTree() {
 						}));
 					}
 					toot.innerHTML += post.content;
+					if ( !post.in_reply_to_id && !is_reblog ) {
+						const post_permalink = createElementObj('a', {
+							innerText: '↗',
+							href: post.url,});
+						if ( toot.lastElementChild ) {
+							toot.lastElementChild.appendChild(post_permalink);
+						} else {
+							toot.appendChild(post_permalink);
+						}
+					}
 					post.media_attachments.forEach(m => {
 						toot.appendChild(
 							createElementObj('img', {
