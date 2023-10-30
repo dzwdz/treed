@@ -32,7 +32,7 @@ h2 {
 	cursor: pointer;
 }
 
-img.avatar {
+img.avatar, .avatar img {
 	width: 3em;
 	height: 3em;
 	margin: 0;
@@ -40,7 +40,7 @@ img.avatar {
 	float: left;
 }
 
-.toot img.avatar { float: right; }
+.toot a.avatar { float: right; }
 
 .toot {
     padding: 0 1em;

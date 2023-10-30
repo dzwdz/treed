@@ -96,11 +96,14 @@ function renderTree() {
 						post = post.reblog;
 						const reblog = createElementObj('div', {classList: 'reblog'});
 						reblog.innerText = post.account.acct;
-						// TODO stop images from preloading to save bandwidth and prevent 429
-						reblog.appendChild(
-							createElementObj('img', {
+							// TODO stop images from preloading to save bandwidth and prevent 429
+						let reblog_avatar = createElementObj('a', {
 								classList: 'avatar',
-								src: post.account.avatar_static,}));
+								href: post.url,});
+						reblog_avatar.appendChild(
+							createElementObj('img', {
+									src: post.account.avatar_static,}));
+						reblog.appendChild(reblog_avatar)
 						toot.appendChild(reblog);
 					}
 					if (post.in_reply_to_id) {
