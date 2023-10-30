@@ -58,6 +58,10 @@ img.avatar, .avatar img {
     margin: 1em 0;
 }
 
+.reply {
+		display: block;
+}
+
 .reblog:before {content: "🔁 ";}
 .reply:before  {content: "↩️ ";}
 .poll:before   {content: "🗳️ ";}

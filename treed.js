@@ -107,9 +107,10 @@ function renderTree() {
 						toot.appendChild(reblog);
 					}
 					if (post.in_reply_to_id) {
-						toot.appendChild(createElementObj('div', {
+						toot.appendChild(createElementObj('a', {
 							classList: 'reply',
-							innerText: 'reply', /* TODO link to full thread view */
+							innerText: 'reply',
+							href: post.url,
 						}));
 					}
 					toot.innerHTML += post.content;
